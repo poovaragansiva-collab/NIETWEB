@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College TMS — Attendance</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/sidebar.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🎓</div>
+    <span class="logo-text">College TMS</span>
+  </div>
+  <nav class="sidebar-nav">
+    <span class="nav-section-title">Overview</span>
+    <a href="index.html" class="nav-item"><span class="nav-icon">⊞</span><span class="nav-label">Dashboard</span></a>
+    <span class="nav-section-title">Management</span>
+    <a href="staff.html" class="nav-item"><span class="nav-icon">👥</span><span class="nav-label">Staff</span></a>
+    <a href="subjects.html" class="nav-item"><span class="nav-icon">📚</span><span class="nav-label">Subjects</span></a>
+    <a href="classrooms.html" class="nav-item"><span class="nav-icon">🏛️</span><span class="nav-label">Classrooms</span></a>
+    <span class="nav-section-title">Scheduling</span>
+    <a href="timetable.html" class="nav-item"><span class="nav-icon">📅</span><span class="nav-label">Timetable</span></a>
+    <a href="attendance.html" class="nav-item active"><span class="nav-icon">✅</span><span class="nav-label">Attendance</span></a>
+  </nav>
+  <div class="sidebar-footer"><span class="nav-label">© 2024 College TMS</span></div>
+</aside>
+
+<div class="layout" id="layout">
+  <header class="header">
+    <div class="header-left">
+      <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+      <nav class="breadcrumb">
+        <a href="index.html" class="breadcrumb-home">Home</a>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">Attendance</span>
+      </nav>
+    </div>
+    <div class="header-right">
+      <span class="header-time" id="header-time"></span>
+      <div class="avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <h1>Attendance Management</h1>
+      <p>Mark and track student attendance per class session</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:24px;align-items:start" id="att-layout">
+
+      <!-- Mark Attendance -->
+      <div class="card">
+        <h3 style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:20px">✅ Mark Attendance</h3>
+
+        <div class="input-group"><label>Date *</label><input id="att-date" type="date"></div>
+        <div class="grid-2">
+          <div class="input-group">
+            <label>Department *</label>
+            <select id="att-dept">
+              <option value="CSE">CSE</option><option value="ECE">ECE</option>
+              <option value="MECH">MECH</option><option value="CIVIL">CIVIL</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Semester</label>
+            <select id="att-sem">${[1,2,3,4,5,6,7,8].map(n=>`<option>${n}</option>`).join('')}</select>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="input-group"><label>Section</label><input id="att-section" value="A" style="text-transform:uppercase" placeholder="A"></div>
+          <div class="input-group"><label>Slot *</label>
+            <select id="att-slot">${[1,2,3,4,5,6].map(n=>`<option value="${n}">Slot ${n}</option>`).join('')}</select>
+          </div>
+        </div>
+        <div class="input-group"><label>Subject Code *</label><input id="att-subject" placeholder="CS101" style="text-transform:uppercase"></div>
+        <div class="input-group"><label>Staff ID (optional)</label><input id="att-staff" placeholder="MongoDB ObjectId"></div>
+        <div class="input-group"><label>Total Students</label><input id="att-total" type="number" value="60" min="1"></div>
+        <div class="input-group">
+          <label>Present Student USNs (comma separated)</label>
+          <textarea id="att-present" placeholder="USN001, USN002, USN003…" rows="3"></textarea>
+        </div>
+
+        <button class="btn btn-primary w-full" id="mark-btn" onclick="markAttendance()">
+          ✅ Mark Attendance
+        </button>
+      </div>
+
+      <!-- Report Section -->
+      <div>
+        <div class="card mb-24">
+          <h3 style="font-family:'Playfair Display',serif;font-size:18px;margin-bottom:16px">📋 Attendance Report</h3>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;margin-bottom:16px">
+            <div class="input-group" style="margin:0">
+              <label>Department</label>
+              <select id="rep-dept">
+                <option value="CSE">CSE</option><option value="ECE">ECE</option>
+                <option value="MECH">MECH</option><option value="CIVIL">CIVIL</option>
+              </select>
+            </div>
+            <div class="input-group" style="margin:0">
+              <label>Semester</label>
+              <select id="rep-sem">${[1,2,3,4,5,6,7,8].map(n=>`<option>${n}</option>`).join('')}</select>
+            </div>
+            <div class="input-group" style="margin:0">
+              <label>Section</label>
+              <input id="rep-section" value="A">
+            </div>
+          </div>
+          <div class="grid-2 mb-16">
+            <div class="input-group" style="margin:0"><label>From Date</label><input id="rep-from" type="date"></div>
+            <div class="input-group" style="margin:0"><label>To Date</label><input id="rep-to" type="date"></div>
+          </div>
+          <div style="display:flex;gap:12px">
+            <button class="btn btn-primary" onclick="loadReport()">📊 Load Report</button>
+            <button class="btn btn-secondary" onclick="exportAttPDF()">📄 Export</button>
+          </div>
+        </div>
+
+        <!-- Summary stats -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <div class="stat-card" style="padding:14px;border-top:3px solid var(--accent-primary)">
+            <div class="stat-label">Total Classes</div>
+            <div class="stat-value" id="att-total-classes" style="font-size:26px">—</div>
+          </div>
+          <div class="stat-card" style="padding:14px;border-top:3px solid var(--accent-success)">
+            <div class="stat-label">Avg Attendance</div>
+            <div class="stat-value" id="att-avg-pct" style="font-size:26px">—</div>
+          </div>
+        </div>
+
+        <!-- Report table -->
+        <div class="card" style="padding:0">
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Subject</th>
+                  <th>Slot</th>
+                  <th>Present / Total</th>
+                  <th>%</th>
+                  <th>Marked At</th>
+                </tr>
+              </thead>
+              <tbody id="att-tbody">
+                <tr><td colspan="6"><div class="empty-state" style="padding:40px 20px"><div class="empty-icon">📋</div><h3>No records yet</h3><p>Load a report or mark attendance first</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/attendance.js"></script>
+<script>
+async function exportAttPDF() {
+  const dept    = document.getElementById('rep-dept').value;
+  const sem     = document.getElementById('rep-sem').value;
+  const section = document.getElementById('rep-section').value.trim() || 'A';
+  window.open(`http://localhost:8000/api/export/attendance/${dept}/${sem}/pdf?section=${section}`, '_blank');
+}
+
+// Responsive: stack on small screens
+function adjustLayout() {
+  const layout = document.getElementById('att-layout');
+  if (window.innerWidth < 900) {
+    layout.style.gridTemplateColumns = '1fr';
+  } else {
+    layout.style.gridTemplateColumns = '1fr 1.5fr';
+  }
+}
+window.addEventListener('resize', adjustLayout);
+adjustLayout();
+</script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College TMS — Dashboard</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/sidebar.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+<!-- ── Sidebar ───────────────────────────────────── -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🎓</div>
+    <span class="logo-text">College TMS</span>
+  </div>
+  <nav class="sidebar-nav">
+    <span class="nav-section-title">Overview</span>
+    <a href="index.html" class="nav-item active">
+      <span class="nav-icon">⊞</span>
+      <span class="nav-label">Dashboard</span>
+    </a>
+    <span class="nav-section-title">Management</span>
+    <a href="staff.html" class="nav-item">
+      <span class="nav-icon">👥</span>
+      <span class="nav-label">Staff</span>
+    </a>
+    <a href="subjects.html" class="nav-item">
+      <span class="nav-icon">📚</span>
+      <span class="nav-label">Subjects</span>
+    </a>
+    <a href="classrooms.html" class="nav-item">
+      <span class="nav-icon">🏛️</span>
+      <span class="nav-label">Classrooms</span>
+    </a>
+    <span class="nav-section-title">Scheduling</span>
+    <a href="timetable.html" class="nav-item">
+      <span class="nav-icon">📅</span>
+      <span class="nav-label">Timetable</span>
+    </a>
+    <a href="attendance.html" class="nav-item">
+      <span class="nav-icon">✅</span>
+      <span class="nav-label">Attendance</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <span class="nav-label">© 2024 College TMS</span>
+  </div>
+</aside>
+
+<!-- ── Main Layout ────────────────────────────────── -->
+<div class="layout" id="layout">
+  <header class="header">
+    <div class="header-left">
+      <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+      <nav class="breadcrumb">
+        <a href="index.html" class="breadcrumb-home">Home</a>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">Dashboard</span>
+      </nav>
+    </div>
+    <div class="header-right">
+      <span class="header-time" id="header-time"></span>
+      <div class="avatar" title="Admin">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <h1>Welcome back, Admin 👋</h1>
+      <p>Here's an overview of your academic management system</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid stagger-children" id="stats-grid">
+      <div class="stat-card animate-fade-in-up" style="border-top:3px solid var(--accent-primary)">
+        <span class="stat-icon">👥</span>
+        <div class="stat-label">Total Staff</div>
+        <div class="stat-value" id="stat-staff">—</div>
+        <div class="stat-sub">Faculty members</div>
+      </div>
+      <div class="stat-card animate-fade-in-up" style="border-top:3px solid var(--accent-secondary)">
+        <span class="stat-icon">📚</span>
+        <div class="stat-label">Subjects</div>
+        <div class="stat-value" id="stat-subjects">—</div>
+        <div class="stat-sub">Across all departments</div>
+      </div>
+      <div class="stat-card animate-fade-in-up" style="border-top:3px solid var(--accent-success)">
+        <span class="stat-icon">🏛️</span>
+        <div class="stat-label">Classrooms</div>
+        <div class="stat-value" id="stat-classrooms">—</div>
+        <div class="stat-sub">Theory & labs</div>
+      </div>
+      <div class="stat-card animate-fade-in-up" style="border-top:3px solid var(--accent-purple)">
+        <span class="stat-icon">📅</span>
+        <div class="stat-label">Timetables</div>
+        <div class="stat-value" id="stat-timetables">—</div>
+        <div class="stat-sub">Generated schedules</div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card mb-24">
+      <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px">Quick Actions</h3>
+      <div class="flex gap-12" style="flex-wrap:wrap">
+        <a href="staff.html" class="btn btn-secondary">👥 Manage Staff</a>
+        <a href="subjects.html" class="btn btn-secondary">📚 Manage Subjects</a>
+        <a href="classrooms.html" class="btn btn-secondary">🏛️ Manage Classrooms</a>
+        <a href="timetable.html" class="btn btn-primary">⚡ Generate Timetable</a>
+        <a href="attendance.html" class="btn btn-success">✅ Mark Attendance</a>
+      </div>
+    </div>
+
+    <!-- Getting Started -->
+    <div class="card">
+      <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px">Getting Started</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
+        <div style="padding:16px;background:var(--bg-elevated);border-radius:var(--radius-md);border:1px solid var(--border)">
+          <div style="font-size:24px;margin-bottom:10px">1️⃣</div>
+          <div style="font-weight:600;margin-bottom:6px">Add Staff</div>
+          <div style="font-size:13px;color:var(--text-secondary)">Register faculty members with their availability and assigned subjects.</div>
+        </div>
+        <div style="padding:16px;background:var(--bg-elevated);border-radius:var(--radius-md);border:1px solid var(--border)">
+          <div style="font-size:24px;margin-bottom:10px">2️⃣</div>
+          <div style="font-weight:600;margin-bottom:6px">Add Subjects</div>
+          <div style="font-size:13px;color:var(--text-secondary)">Define theory and lab subjects with hours per week and assigned staff.</div>
+        </div>
+        <div style="padding:16px;background:var(--bg-elevated);border-radius:var(--radius-md);border:1px solid var(--border)">
+          <div style="font-size:24px;margin-bottom:10px">3️⃣</div>
+          <div style="font-weight:600;margin-bottom:6px">Generate Timetable</div>
+          <div style="font-size:13px;color:var(--text-secondary)">Auto-generate conflict-free schedules with lab-first allocation.</div>
+        </div>
+        <div style="padding:16px;background:var(--bg-elevated);border-radius:var(--radius-md);border:1px solid var(--border)">
+          <div style="font-size:24px;margin-bottom:10px">4️⃣</div>
+          <div style="font-weight:600;margin-bottom:6px">Mark Attendance</div>
+          <div style="font-size:13px;color:var(--text-secondary)">Track student attendance per subject and generate reports.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- API Status -->
+    <div class="card mt-24">
+      <div class="flex-between">
+        <div>
+          <h3 style="font-family:'Playfair Display',serif;font-size:18px">API Status</h3>
+          <p style="font-size:13px;color:var(--text-secondary);margin-top:4px">Backend connectivity check</p>
+        </div>
+        <div id="api-status" style="display:flex;align-items:center;gap:8px;font-size:14px">
+          <span class="spinner"></span> Checking…
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:13px;color:var(--text-muted)">
+        API Docs: <a href="http://localhost:8000/docs" target="_blank" style="color:var(--accent-primary)">http://localhost:8000/docs</a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script>
+  async function loadStats() {
+    try {
+      const [staff, subjects, classrooms, timetables] = await Promise.allSettled([
+        api.get('/staff'), api.get('/subjects'), api.get('/classrooms'), api.get('/timetable')
+      ]);
+      document.getElementById('stat-staff').textContent      = staff.value?.length      ?? '—';
+      document.getElementById('stat-subjects').textContent   = subjects.value?.length   ?? '—';
+      document.getElementById('stat-classrooms').textContent = classrooms.value?.length ?? '—';
+      document.getElementById('stat-timetables').textContent = timetables.value?.length ?? '—';
+
+      document.getElementById('api-status').innerHTML = `
+        <span style="width:10px;height:10px;border-radius:50%;background:var(--accent-success);display:inline-block"></span>
+        <span style="color:var(--accent-success)">Connected</span>`;
+    } catch(e) {
+      document.getElementById('api-status').innerHTML = `
+        <span style="width:10px;height:10px;border-radius:50%;background:var(--accent-danger);display:inline-block"></span>
+        <span style="color:var(--accent-danger)">Offline — Start the backend server</span>`;
+    }
+  }
+  document.addEventListener('DOMContentLoaded', loadStats);
+</script>
+</body>
+</html>

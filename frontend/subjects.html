@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College TMS — Subjects</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/sidebar.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🎓</div>
+    <span class="logo-text">College TMS</span>
+  </div>
+  <nav class="sidebar-nav">
+    <span class="nav-section-title">Overview</span>
+    <a href="index.html" class="nav-item"><span class="nav-icon">⊞</span><span class="nav-label">Dashboard</span></a>
+    <span class="nav-section-title">Management</span>
+    <a href="staff.html" class="nav-item"><span class="nav-icon">👥</span><span class="nav-label">Staff</span></a>
+    <a href="subjects.html" class="nav-item active"><span class="nav-icon">📚</span><span class="nav-label">Subjects</span></a>
+    <a href="classrooms.html" class="nav-item"><span class="nav-icon">🏛️</span><span class="nav-label">Classrooms</span></a>
+    <span class="nav-section-title">Scheduling</span>
+    <a href="timetable.html" class="nav-item"><span class="nav-icon">📅</span><span class="nav-label">Timetable</span></a>
+    <a href="attendance.html" class="nav-item"><span class="nav-icon">✅</span><span class="nav-label">Attendance</span></a>
+  </nav>
+  <div class="sidebar-footer"><span class="nav-label">© 2024 College TMS</span></div>
+</aside>
+
+<div class="layout" id="layout">
+  <header class="header">
+    <div class="header-left">
+      <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+      <nav class="breadcrumb">
+        <a href="index.html" class="breadcrumb-home">Home</a>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">Subjects</span>
+      </nav>
+    </div>
+    <div class="header-right">
+      <span class="header-time" id="header-time"></span>
+      <div class="avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header-row">
+      <div class="page-header" style="margin-bottom:0">
+        <h1>Subject Management</h1>
+        <p>Manage theory and lab subjects across departments and semesters</p>
+      </div>
+      <button class="btn btn-primary" onclick="openAddSubject()">+ Add Subject</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex gap-12 mb-24" style="flex-wrap:wrap">
+      <div class="search-bar" style="flex:1;max-width:320px">
+        <span>🔍</span>
+        <input id="sub-search" placeholder="Search subjects…">
+      </div>
+      <select id="filter-dept" class="input-group" style="margin:0;min-width:140px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 14px;color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:14px;outline:none">
+        <option value="">All Departments</option>
+        <option value="CSE">CSE</option>
+        <option value="ECE">ECE</option>
+        <option value="MECH">MECH</option>
+      </select>
+      <select id="filter-type" style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 14px;color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:14px;outline:none">
+        <option value="">All Types</option>
+        <option value="theory">Theory</option>
+        <option value="lab">Lab</option>
+      </select>
+      <select id="filter-sem" style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 14px;color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:14px;outline:none">
+        <option value="">All Semesters</option>
+        <option>1</option><option>2</option><option>3</option>
+        <option>4</option><option>5</option><option>6</option>
+      </select>
+      <button class="btn btn-secondary" onclick="applyFilters()">Filter</button>
+    </div>
+
+    <!-- Table -->
+    <div class="card" style="padding:0">
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Subject Name</th>
+              <th>Department</th>
+              <th>Sem</th>
+              <th>Type</th>
+              <th>Hrs/Week</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="sub-tbody">
+            <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📚</div><h3>Loading…</h3></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script>
+let allSubjects = [];
+let allStaff = [];
+const SUBJECT_COLORS = ['#6366F1','#F59E0B','#10B981','#EF4444','#8B5CF6','#06B6D4','#EC4899','#84CC16'];
+
+async function loadSubjects() {
+  ui.showSkeleton('sub-tbody', 7);
+  try {
+    [allSubjects, allStaff] = await Promise.all([api.get('/subjects'), api.get('/staff')]);
+    renderSubjects(allSubjects);
+  } catch(e) {
+    ui.toast('Failed to load: ' + e.message, 'error');
+  }
+}
+
+function renderSubjects(list) {
+  const tbody = document.getElementById('sub-tbody');
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📚</div><h3>No subjects found</h3><p>Add your first subject to get started</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(s => `
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:8px"><span class="color-dot" style="background:${s.color||'#6366F1'}"></span><code style="font-family:monospace;font-size:13px;color:var(--accent-primary)">${s.code}</code></div></td>
+      <td><strong>${s.name}</strong></td>
+      <td><span class="badge badge-${s.department.toLowerCase()}">${s.department}</span></td>
+      <td style="text-align:center;font-weight:600">${s.semester}</td>
+      <td><span class="badge ${s.type==='lab'?'badge-lab':'badge-theory'}">${s.type}</span></td>
+      <td style="text-align:center">${s.hours_per_week}h</td>
+      <td><div class="actions">
+        <button class="btn btn-secondary btn-sm" onclick="editSubject('${s.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSubject('${s.id}','${s.name}')">Delete</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+function applyFilters() {
+  const search = document.getElementById('sub-search').value.toLowerCase();
+  const dept   = document.getElementById('filter-dept').value;
+  const type   = document.getElementById('filter-type').value;
+  const sem    = document.getElementById('filter-sem').value;
+  const filtered = allSubjects.filter(s =>
+    (!search || s.name.toLowerCase().includes(search) || s.code.toLowerCase().includes(search)) &&
+    (!dept   || s.department === dept) &&
+    (!type   || s.type === type) &&
+    (!sem    || String(s.semester) === sem)
+  );
+  renderSubjects(filtered);
+}
+
+function staffOptions(selected = '') {
+  return allStaff.map(st => `<option value="${st.id}" ${st.id===selected?'selected':''}>${st.name} (${st.department})</option>`).join('');
+}
+
+function openAddSubject() {
+  ui.modal({
+    title: 'Add Subject',
+    content: `
+      <div class="grid-2">
+        <div class="input-group"><label>Subject Code *</label><input id="s-code" placeholder="CS101"></div>
+        <div class="input-group"><label>Department *</label>
+          <select id="s-dept">
+            <option value="CSE">CSE</option><option value="ECE">ECE</option>
+            <option value="MECH">MECH</option><option value="CIVIL">CIVIL</option><option value="EEE">EEE</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-group"><label>Subject Name *</label><input id="s-name" placeholder="Data Structures and Algorithms"></div>
+      <div class="grid-2">
+        <div class="input-group"><label>Semester *</label>
+          <select id="s-sem">${[1,2,3,4,5,6,7,8].map(n=>`<option>${n}</option>`).join('')}</select>
+        </div>
+        <div class="input-group"><label>Type</label>
+          <select id="s-type"><option value="theory">Theory</option><option value="lab">Lab</option></select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="input-group"><label>Hours per Week</label><input id="s-hours" type="number" value="4" min="1" max="10"></div>
+        <div class="input-group"><label>Assign Staff</label><select id="s-staff"><option value="">— No staff —</option>${staffOptions()}</select></div>
+      </div>
+      <div class="input-group"><label>Color</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+          ${SUBJECT_COLORS.map((c,i) => `<label style="cursor:pointer"><input type="radio" name="sub-color" value="${c}" ${i===0?'checked':''} style="display:none">
+            <span style="display:inline-block;width:28px;height:28px;border-radius:6px;background:${c};border:2px solid transparent;transition:border 0.2s"
+              onclick="this.previousElementSibling.checked=true;document.querySelectorAll('[name=sub-color]~span').forEach(s=>s.style.borderColor='transparent');this.style.borderColor='white'"></span>
+          </label>`).join('')}
+        </div>
+      </div>
+    `,
+    confirmText: 'Add Subject',
+    onConfirm: async (overlay) => {
+      const code  = overlay.querySelector('#s-code').value.trim().toUpperCase();
+      const name  = overlay.querySelector('#s-name').value.trim();
+      const dept  = overlay.querySelector('#s-dept').value;
+      const sem   = parseInt(overlay.querySelector('#s-sem').value);
+      const type  = overlay.querySelector('#s-type').value;
+      const hours = parseInt(overlay.querySelector('#s-hours').value);
+      const staff_id = overlay.querySelector('#s-staff').value;
+      const colorRadio = overlay.querySelector('[name=sub-color]:checked');
+      const color = colorRadio ? colorRadio.value : '#6366F1';
+
+      if (!code || !name) { ui.toast('Code and name are required', 'error'); throw new Error('validation'); }
+      await api.post('/subjects', { code, name, department: dept, semester: sem, type, hours_per_week: hours, staff_id: staff_id || null, color });
+      ui.toast(`${name} added!`, 'success');
+      await loadSubjects();
+    },
+  });
+}
+
+async function editSubject(id) {
+  const sub = allSubjects.find(s => s.id === id);
+  if (!sub) return;
+  ui.modal({
+    title: 'Edit Subject',
+    content: `
+      <div class="input-group"><label>Subject Name</label><input id="s-name" value="${sub.name}"></div>
+      <div class="grid-2">
+        <div class="input-group"><label>Dept</label>
+          <select id="s-dept">${['CSE','ECE','MECH','CIVIL','EEE'].map(d=>`<option value="${d}" ${d===sub.department?'selected':''}>${d}</option>`).join('')}</select>
+        </div>
+        <div class="input-group"><label>Semester</label>
+          <select id="s-sem">${[1,2,3,4,5,6,7,8].map(n=>`<option ${n===sub.semester?'selected':''}>${n}</option>`).join('')}</select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="input-group"><label>Type</label>
+          <select id="s-type"><option value="theory" ${sub.type==='theory'?'selected':''}>Theory</option><option value="lab" ${sub.type==='lab'?'selected':''}>Lab</option></select>
+        </div>
+        <div class="input-group"><label>Hours/Week</label><input id="s-hours" type="number" value="${sub.hours_per_week}" min="1" max="10"></div>
+      </div>
+      <div class="input-group"><label>Assign Staff</label>
+        <select id="s-staff"><option value="">— No staff —</option>${staffOptions(sub.staff_id||'')}</select>
+      </div>
+    `,
+    confirmText: 'Save Changes',
+    onConfirm: async (overlay) => {
+      const name  = overlay.querySelector('#s-name').value.trim();
+      const dept  = overlay.querySelector('#s-dept').value;
+      const sem   = parseInt(overlay.querySelector('#s-sem').value);
+      const type  = overlay.querySelector('#s-type').value;
+      const hours = parseInt(overlay.querySelector('#s-hours').value);
+      const staff_id = overlay.querySelector('#s-staff').value;
+      await api.put(`/subjects/${id}`, { name, department: dept, semester: sem, type, hours_per_week: hours, staff_id: staff_id || null });
+      ui.toast('Subject updated!', 'success');
+      await loadSubjects();
+    },
+  });
+}
+
+async function deleteSubject(id, name) {
+  const ok = await ui.confirm(`Delete subject <strong>${name}</strong>?`);
+  if (!ok) return;
+  try {
+    await api.delete(`/subjects/${id}`);
+    ui.toast(`${name} deleted`, 'success');
+    await loadSubjects();
+  } catch(e) { ui.toast(e.message, 'error'); }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadSubjects();
+  const s = document.getElementById('sub-search');
+  if (s) s.addEventListener('input', ui.debounce(applyFilters, 250));
+});
+</script>
+</body>
+</html>

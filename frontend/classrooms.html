@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College TMS — Classrooms</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/sidebar.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🎓</div>
+    <span class="logo-text">College TMS</span>
+  </div>
+  <nav class="sidebar-nav">
+    <span class="nav-section-title">Overview</span>
+    <a href="index.html" class="nav-item"><span class="nav-icon">⊞</span><span class="nav-label">Dashboard</span></a>
+    <span class="nav-section-title">Management</span>
+    <a href="staff.html" class="nav-item"><span class="nav-icon">👥</span><span class="nav-label">Staff</span></a>
+    <a href="subjects.html" class="nav-item"><span class="nav-icon">📚</span><span class="nav-label">Subjects</span></a>
+    <a href="classrooms.html" class="nav-item active"><span class="nav-icon">🏛️</span><span class="nav-label">Classrooms</span></a>
+    <span class="nav-section-title">Scheduling</span>
+    <a href="timetable.html" class="nav-item"><span class="nav-icon">📅</span><span class="nav-label">Timetable</span></a>
+    <a href="attendance.html" class="nav-item"><span class="nav-icon">✅</span><span class="nav-label">Attendance</span></a>
+  </nav>
+  <div class="sidebar-footer"><span class="nav-label">© 2024 College TMS</span></div>
+</aside>
+
+<div class="layout" id="layout">
+  <header class="header">
+    <div class="header-left">
+      <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+      <nav class="breadcrumb">
+        <a href="index.html" class="breadcrumb-home">Home</a>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">Classrooms</span>
+      </nav>
+    </div>
+    <div class="header-right">
+      <span class="header-time" id="header-time"></span>
+      <div class="avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header-row">
+      <div class="page-header" style="margin-bottom:0">
+        <h1>Classroom Management</h1>
+        <p>Manage theory classrooms and lab facilities</p>
+      </div>
+      <button class="btn btn-primary" onclick="openAdd()">+ Add Classroom</button>
+    </div>
+
+    <!-- Stats mini -->
+    <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:24px">
+      <div class="stat-card" style="padding:16px;border-top:3px solid var(--accent-primary)">
+        <div class="stat-label">Theory Rooms</div>
+        <div class="stat-value" id="count-theory" style="font-size:28px">—</div>
+      </div>
+      <div class="stat-card" style="padding:16px;border-top:3px solid var(--accent-secondary)">
+        <div class="stat-label">Labs</div>
+        <div class="stat-value" id="count-lab" style="font-size:28px">—</div>
+      </div>
+      <div class="stat-card" style="padding:16px;border-top:3px solid var(--accent-success)">
+        <div class="stat-label">Total Capacity</div>
+        <div class="stat-value" id="count-cap" style="font-size:28px">—</div>
+      </div>
+    </div>
+
+    <!-- Cards grid -->
+    <div id="room-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
+      <div class="card"><div class="empty-state"><div class="empty-icon">🏛️</div><h3>Loading…</h3></div></div>
+    </div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script>
+let allRooms = [];
+
+async function loadRooms() {
+  try {
+    allRooms = await api.get('/classrooms');
+    renderRooms(allRooms);
+    document.getElementById('count-theory').textContent = allRooms.filter(r=>r.type==='theory').length;
+    document.getElementById('count-lab').textContent    = allRooms.filter(r=>r.type==='lab').length;
+    document.getElementById('count-cap').textContent    = allRooms.reduce((a,r)=>a+(r.capacity||0),0);
+  } catch(e) {
+    ui.toast('Failed to load: ' + e.message, 'error');
+  }
+}
+
+function renderRooms(list) {
+  const grid = document.getElementById('room-grid');
+  if (!list.length) {
+    grid.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="empty-state"><div class="empty-icon">🏛️</div><h3>No classrooms yet</h3><p>Add your first classroom to get started</p></div></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(r => `
+    <div class="card animate-fade-in-up" style="padding:20px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div style="font-size:22px;font-family:'Playfair Display',serif;font-weight:600">${r.room_number}</div>
+          <div style="font-size:13px;color:var(--text-secondary)">${r.building}</div>
+        </div>
+        <span class="badge ${r.type==='lab'?'badge-lab':'badge-theory'}">${r.type}</span>
+      </div>
+      <div style="display:flex;gap:16px;font-size:13px;color:var(--text-secondary);margin-bottom:16px">
+        <span>👥 ${r.capacity} seats</span>
+        ${r.department ? `<span>🏫 ${r.department}</span>` : ''}
+      </div>
+      ${r.facilities?.length ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">${r.facilities.map(f=>`<span class="badge badge-free" style="font-size:11px">${f}</span>`).join('')}</div>` : ''}
+      <div class="flex gap-8 mt-8">
+        <button class="btn btn-secondary btn-sm" style="flex:1" onclick="editRoom('${r.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRoom('${r.id}','${r.room_number}')">🗑</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function roomModalContent(r = {}) {
+  const FACILITIES = ['Projector','Smart Board','AC','WiFi','Lab Computers','Oscilloscope','3D Printer'];
+  return `
+    <div class="grid-2">
+      <div class="input-group"><label>Room Number *</label><input id="r-num" value="${r.room_number||''}" placeholder="101-A"></div>
+      <div class="input-group"><label>Building *</label><input id="r-bld" value="${r.building||''}" placeholder="Main Block"></div>
+    </div>
+    <div class="grid-2">
+      <div class="input-group"><label>Type</label>
+        <select id="r-type"><option value="theory" ${r.type!=='lab'?'selected':''}>Theory</option><option value="lab" ${r.type==='lab'?'selected':''}>Lab</option></select>
+      </div>
+      <div class="input-group"><label>Capacity</label><input id="r-cap" type="number" value="${r.capacity||60}" min="1"></div>
+    </div>
+    <div class="input-group"><label>Department</label>
+      <select id="r-dept">
+        <option value="" ${!r.department?'selected':''}>General</option>
+        ${['CSE','ECE','MECH','CIVIL','EEE'].map(d=>`<option value="${d}" ${r.department===d?'selected':''}>${d}</option>`).join('')}
+      </select>
+    </div>
+    <div class="input-group"><label>Facilities</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
+        ${FACILITIES.map(f=>`<label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer">
+          <input type="checkbox" class="fac-check" value="${f}" ${(r.facilities||[]).includes(f)?'checked':''} style="accent-color:var(--accent-primary)">
+          ${f}
+        </label>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function readFacilities(overlay) {
+  return [...overlay.querySelectorAll('.fac-check:checked')].map(c => c.value);
+}
+
+function openAdd() {
+  ui.modal({
+    title: 'Add Classroom',
+    content: roomModalContent(),
+    confirmText: 'Add Classroom',
+    onConfirm: async (overlay) => {
+      const room_number = overlay.querySelector('#r-num').value.trim();
+      const building    = overlay.querySelector('#r-bld').value.trim();
+      const type        = overlay.querySelector('#r-type').value;
+      const capacity    = parseInt(overlay.querySelector('#r-cap').value);
+      const department  = overlay.querySelector('#r-dept').value;
+      const facilities  = readFacilities(overlay);
+      if (!room_number || !building) { ui.toast('Room number and building are required', 'error'); throw new Error(); }
+      await api.post('/classrooms', { room_number, building, type, capacity, department, facilities });
+      ui.toast('Classroom added!', 'success');
+      await loadRooms();
+    },
+  });
+}
+
+async function editRoom(id) {
+  const r = allRooms.find(x => x.id === id);
+  if (!r) return;
+  ui.modal({
+    title: 'Edit Classroom',
+    content: roomModalContent(r),
+    confirmText: 'Save Changes',
+    onConfirm: async (overlay) => {
+      const room_number = overlay.querySelector('#r-num').value.trim();
+      const building    = overlay.querySelector('#r-bld').value.trim();
+      const type        = overlay.querySelector('#r-type').value;
+      const capacity    = parseInt(overlay.querySelector('#r-cap').value);
+      const department  = overlay.querySelector('#r-dept').value;
+      const facilities  = readFacilities(overlay);
+      await api.put(`/classrooms/${id}`, { room_number, building, type, capacity, department, facilities });
+      ui.toast('Updated!', 'success');
+      await loadRooms();
+    },
+  });
+}
+
+async function deleteRoom(id, num) {
+  const ok = await ui.confirm(`Delete classroom <strong>${num}</strong>?`);
+  if (!ok) return;
+  try {
+    await api.delete(`/classrooms/${id}`);
+    ui.toast(`${num} deleted`, 'success');
+    await loadRooms();
+  } catch(e) { ui.toast(e.message, 'error'); }
+}
+
+document.addEventListener('DOMContentLoaded', loadRooms);
+</script>
+</body>
+</html>

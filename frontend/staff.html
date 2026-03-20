@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College TMS — Staff</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/sidebar.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🎓</div>
+    <span class="logo-text">College TMS</span>
+  </div>
+  <nav class="sidebar-nav">
+    <span class="nav-section-title">Overview</span>
+    <a href="index.html" class="nav-item"><span class="nav-icon">⊞</span><span class="nav-label">Dashboard</span></a>
+    <span class="nav-section-title">Management</span>
+    <a href="staff.html" class="nav-item active"><span class="nav-icon">👥</span><span class="nav-label">Staff</span></a>
+    <a href="subjects.html" class="nav-item"><span class="nav-icon">📚</span><span class="nav-label">Subjects</span></a>
+    <a href="classrooms.html" class="nav-item"><span class="nav-icon">🏛️</span><span class="nav-label">Classrooms</span></a>
+    <span class="nav-section-title">Scheduling</span>
+    <a href="timetable.html" class="nav-item"><span class="nav-icon">📅</span><span class="nav-label">Timetable</span></a>
+    <a href="attendance.html" class="nav-item"><span class="nav-icon">✅</span><span class="nav-label">Attendance</span></a>
+  </nav>
+  <div class="sidebar-footer"><span class="nav-label">© 2024 College TMS</span></div>
+</aside>
+
+<div class="layout" id="layout">
+  <header class="header">
+    <div class="header-left">
+      <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+      <nav class="breadcrumb">
+        <a href="index.html" class="breadcrumb-home">Home</a>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">Staff</span>
+      </nav>
+    </div>
+    <div class="header-right">
+      <span class="header-time" id="header-time"></span>
+      <div class="avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header-row">
+      <div class="page-header" style="margin-bottom:0">
+        <h1>Staff Management</h1>
+        <p>Manage faculty members, their departments and availability</p>
+      </div>
+      <button class="btn btn-primary" onclick="openAddStaff()">+ Add Staff</button>
+    </div>
+
+    <!-- Search & Stats -->
+    <div class="flex-between gap-16 mb-24" style="flex-wrap:wrap">
+      <div class="search-bar" style="flex:1;max-width:360px">
+        <span>🔍</span>
+        <input id="staff-search" placeholder="Search by name, department or email…">
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text-secondary)">
+        Total: <strong id="staff-count" style="color:var(--text-primary)">—</strong> staff members
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card" style="padding:0">
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Staff Member</th>
+              <th>Department</th>
+              <th>Subjects</th>
+              <th>Availability</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="staff-tbody">
+            <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">👥</div><h3>Loading…</h3></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/staff.js"></script>
+</body>
+</html>

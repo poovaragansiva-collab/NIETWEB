@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College TMS — Timetable</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/sidebar.css">
+  <link rel="stylesheet" href="css/timetable.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🎓</div>
+    <span class="logo-text">College TMS</span>
+  </div>
+  <nav class="sidebar-nav">
+    <span class="nav-section-title">Overview</span>
+    <a href="index.html" class="nav-item"><span class="nav-icon">⊞</span><span class="nav-label">Dashboard</span></a>
+    <span class="nav-section-title">Management</span>
+    <a href="staff.html" class="nav-item"><span class="nav-icon">👥</span><span class="nav-label">Staff</span></a>
+    <a href="subjects.html" class="nav-item"><span class="nav-icon">📚</span><span class="nav-label">Subjects</span></a>
+    <a href="classrooms.html" class="nav-item"><span class="nav-icon">🏛️</span><span class="nav-label">Classrooms</span></a>
+    <span class="nav-section-title">Scheduling</span>
+    <a href="timetable.html" class="nav-item active"><span class="nav-icon">📅</span><span class="nav-label">Timetable</span></a>
+    <a href="attendance.html" class="nav-item"><span class="nav-icon">✅</span><span class="nav-label">Attendance</span></a>
+  </nav>
+  <div class="sidebar-footer"><span class="nav-label">© 2024 College TMS</span></div>
+</aside>
+
+<div class="layout" id="layout">
+  <header class="header">
+    <div class="header-left">
+      <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+      <nav class="breadcrumb">
+        <a href="index.html" class="breadcrumb-home">Home</a>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">Timetable</span>
+      </nav>
+    </div>
+    <div class="header-right">
+      <span class="header-time" id="header-time"></span>
+      <div class="avatar">A</div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="page-header">
+      <h1>Timetable Manager</h1>
+      <p>Auto-generate and manage conflict-free weekly schedules</p>
+    </div>
+
+    <!-- Tab switcher -->
+    <div style="display:flex;gap:4px;background:var(--bg-elevated);border-radius:var(--radius-sm);padding:4px;width:fit-content;margin-bottom:24px">
+      <button class="btn" id="tab-gen" onclick="switchTab('gen')" style="background:var(--accent-primary);color:white">⚡ Generate</button>
+      <button class="btn btn-secondary" id="tab-view" onclick="switchTab('view')">📋 View Existing</button>
+    </div>
+
+    <!-- Generate tab -->
+    <div id="panel-gen">
+      <div class="card mb-24">
+        <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px">Generate New Timetable</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px">
+          <div class="input-group">
+            <label>Department *</label>
+            <select id="gen-dept">
+              <option value="CSE">Computer Science (CSE)</option>
+              <option value="ECE">Electronics (ECE)</option>
+              <option value="MECH">Mechanical (MECH)</option>
+              <option value="CIVIL">Civil</option>
+              <option value="EEE">Electrical (EEE)</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Semester *</label>
+            <select id="gen-sem">
+              <option>1</option><option>2</option><option>3</option>
+              <option>4</option><option>5</option><option>6</option>
+              <option>7</option><option>8</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Section</label>
+            <input id="gen-section" placeholder="A" value="A" style="text-transform:uppercase">
+          </div>
+          <div class="input-group">
+            <label>Academic Year</label>
+            <input id="gen-year" value="2024-25" placeholder="2024-25">
+          </div>
+          <div class="input-group">
+            <label>Working Days</label>
+            <select id="gen-days">
+              <option value="5">5 Days</option>
+              <option value="6">6 Days</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label>Slots Per Day</label>
+            <input id="gen-slots" type="number" value="6" min="4" max="9">
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" id="gen-btn" onclick="generateTimetable()">
+            ⚡ Generate Timetable
+          </button>
+          <button class="btn btn-success" id="export-btn" onclick="exportPDF()" disabled>
+            📄 Export PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- View existing tab -->
+    <div id="panel-view" style="display:none">
+      <div class="card mb-24">
+        <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px">Load Existing Timetable</h3>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
+          <div class="input-group" style="margin:0;flex:1;min-width:120px">
+            <label>Department</label>
+            <select id="view-dept">
+              <option value="CSE">CSE</option><option value="ECE">ECE</option>
+              <option value="MECH">MECH</option><option value="CIVIL">CIVIL</option>
+            </select>
+          </div>
+          <div class="input-group" style="margin:0;flex:1;min-width:80px">
+            <label>Semester</label>
+            <select id="view-sem">${[1,2,3,4,5,6,7,8].map(n=>`<option>${n}</option>`).join('')}</select>
+          </div>
+          <div class="input-group" style="margin:0;min-width:80px">
+            <label>Section</label>
+            <input id="view-section" value="A" style="text-transform:uppercase">
+          </div>
+          <button class="btn btn-primary" onclick="loadExistingTimetable()">📋 Load</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timetable display -->
+    <div class="card" id="timetable-display" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+        <div>
+          <h3 style="font-family:'Playfair Display',serif;font-size:20px">Weekly Schedule</h3>
+          <div style="font-size:13px;color:var(--text-secondary);margin-top:4px" id="tt-meta"></div>
+        </div>
+        <div class="tt-legend">
+          <div class="legend-item"><span class="legend-dot legend-theory"></span>Theory</div>
+          <div class="legend-item"><span class="legend-dot legend-lab"></span>Lab</div>
+          <div class="legend-item"><span class="legend-dot legend-free"></span>Free</div>
+        </div>
+      </div>
+      <div class="timetable-wrapper">
+        <table class="timetable-grid" id="timetable-table"></table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/timetable.js"></script>
+<script>
+function switchTab(tab) {
+  document.getElementById('panel-gen').style.display  = tab === 'gen'  ? '' : 'none';
+  document.getElementById('panel-view').style.display = tab === 'view' ? '' : 'none';
+  document.getElementById('tab-gen').style.background  = tab === 'gen'  ? 'var(--accent-primary)' : '';
+  document.getElementById('tab-gen').style.color       = tab === 'gen'  ? 'white' : '';
+  document.getElementById('tab-view').style.background = tab === 'view' ? 'var(--accent-primary)' : '';
+  document.getElementById('tab-view').style.color      = tab === 'view' ? 'white' : '';
+  document.getElementById('tab-gen').className  = tab === 'gen'  ? 'btn' : 'btn btn-secondary';
+  document.getElementById('tab-view').className = tab === 'view' ? 'btn' : 'btn btn-secondary';
+}
+</script>
+</body>
+</html>
