@@ -1,4 +1,4 @@
-const API_BASE = 'https://college-tms.onrender.com/api';
+const API_BASE = 'https://nietweb.onrender.com/api';
 
 const api = {
   async request(method, path, data = null) {

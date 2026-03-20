@@ -81,7 +81,7 @@ function renderTimetable(data) {
 
 async function exportPDF() {
   if (!currentTimetableId) return;
-  window.open(`http://localhost:8000/api/export/timetable/${currentTimetableId}/pdf`, '_blank');
+  window.open(`https://nietweb.onrender.com/api/export/timetable/${currentTimetableId}/pdf`, '_blank');
 }
 
 async function loadExistingTimetable() {
